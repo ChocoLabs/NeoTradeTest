@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="NeoTrade – Asesor financiero con IA" />
+    <title>NeoTrade – IA Financiera</title>
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+
+      html {
+        font-family: "Inter", sans-serif;
+        scroll-behavior: smooth;
+      }
+      .chat-bubble {
+        max-width: 80%;
+        padding: 0.75rem 1rem;
+        border-radius: 1rem;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        word-wrap: break-word;
+      }
+      .chat-bubble.user {
+        margin-left: auto;
+        background-color: #4f46e5;
+        color: #fff;
+        border-bottom-right-radius: 0.25rem;
+      }
+      .chat-bubble.assistant {
+        margin-right: auto;
+        background-color: #f3f4f6;
+        color: #111827;
+        border-bottom-left-radius: 0.25rem;
+      }
+      .messages {
+        scrollbar-width: thin;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 text-gray-900 min-h-screen flex flex-col">
+    <header class="bg-white shadow-md sticky top-0 z-20 p-4 flex items-center justify-between">
+      <h1 class="text-2xl font-bold">📊 NeoTrade</h1>
+      <button id="theme-toggle" class="text-gray-600 hover:text-indigo-600">🌙</button>
+    </header>
+
+    <main class="flex-1 grid grid-cols-1 md:grid-cols-[3fr_1fr]">
+      <!-- Chat Principal -->
+      <section class="flex flex-col border-r border-gray-200">
+        <div id="messages" class="messages flex-1 overflow-y-auto p-4 space-y-4 bg-white"></div>
+        <form id="chat-form" class="p-4 bg-gray-50 border-t flex gap-2">
+          <textarea
+            id="user-input"
+            class="flex-1 p-3 rounded-md border resize-none focus:outline-none focus:ring focus:border-indigo-500"
+            rows="2"
+            placeholder="Escribe tu mensaje..."
+            required
+          ></textarea>
+          <button
+            type="submit"
+            class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition"
+          >
+            Enviar
+          </button>
+        </form>
+      </section>
+
+      <!-- Panel lateral -->
+      <aside class="hidden md:flex flex-col gap-4 p-4 bg-gray-50">
+        <h2 class="text-xl font-semibold">Asistente IA</h2>
+        <select id="script-select" class="p-2 border rounded-md">
+          <option value="">Selecciona un guion…</option>
+          <option value="bienvenida">Saludo de bienvenida</option>
+          <option value="analisis-accion">Análisis de una acción</option>
+          <option value="riesgo-cartera">Evaluar riesgo de cartera</option>
+        </select>
+        <button
+          id="run-script"
+          class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+        >
+          Ejecutar guion
+        </button>
+        <p class="text-sm text-gray-500">
+          Selecciona un guion predefinido para rellenar el mensaje automáticamente.
+        </p>
+      </aside>
+    </main>
+
+    <footer class="bg-white text-center p-4 text-sm text-gray-500 border-t">
+      NeoTrade no sustituye asesoramiento profesional. <a href="#" class="underline">Términos</a>.
+    </footer>
+
+    <script>
+      const form = document.getElementById("chat-form");
+      const input = document.getElementById("user-input");
+      const messages = document.getElementById("messages");
+      const scriptSelect = document.getElementById("script-select");
+      const runScriptBtn = document.getElementById("run-script");
+      const themeToggle = document.getElementById("theme-toggle");
+
+      const assistantId = "asst_mKeLzUY6kKN819oalJQ0n23O";
+      const apiUrl = "https://tu-backend.aqui/api/chat"; // ← CAMBIA esto a tu URL real
+
+      const scripts = {
+        bienvenida:
+          "¡Hola! Soy NeoTrade, tu asesor financiero. ¿En qué puedo ayudarte hoy?",
+        "analisis-accion":
+          "Indícame la acción que deseas analizar y te proporcionaré un análisis detallado.",
+        "riesgo-cartera":
+          "Dime cómo está distribuida tu cartera actual y evaluaremos su nivel de riesgo.",
+      };
+
+      runScriptBtn.onclick = () => {
+        const key = scriptSelect.value;
+        if (scripts[key]) input.value = scripts[key];
+      };
+
+      const createBubble = (text, sender) => {
+        const bubble = document.createElement("div");
+        bubble.className = `chat-bubble ${sender}`;
+        bubble.textContent = text;
+        return bubble;
+      };
+
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+
+        messages.appendChild(createBubble(text, "user"));
+        input.value = "";
+        messages.scrollTop = messages.scrollHeight;
+
+        const loading = createBubble("Escribiendo...", "assistant");
+        messages.appendChild(loading);
+        messages.scrollTop = messages.scrollHeight;
+
+        try {
+          const res = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: text, assistant_id: assistantId }),
+          });
+          const data = await res.json();
+          loading.remove();
+          messages.appendChild(createBubble(data.reply, "assistant"));
+        } catch (err) {
+          loading.textContent = "Error de conexión con el servidor.";
+        }
+      };
+
+      themeToggle.onclick = () => {
+        document.documentElement.classList.toggle("dark");
+      };
+    </script>
+  </body>
+</html>
