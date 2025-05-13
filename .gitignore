@@ -1,0 +1,41 @@
+# 🔒 Archivos sensibles
+.env
+.env.local
+*.key
+apikey.txt
+secrets.json
+config.json
+config/keys.json
+
+# 💻 Archivos del sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 🗂️ Logs y temporales
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ⚙️ Compilados y cachés
+dist/
+build/
+.cache/
+.vscode/
+.idea/
+*.swp
+
+# 🧰 Dependencias (si usas npm/yarn más adelante)
+node_modules/
+
+# 📸 Archivos personales que no deben ir al repo
+*.bak
+*.tmp
+*.old
+
+# 🚫 GitHub Pages temporales
+CNAME
+
+# ✅ GitHub Pages real sí se sube (si tú lo decides)
+# (Puedes borrar "CNAME" arriba si quieres que sí se suba)
